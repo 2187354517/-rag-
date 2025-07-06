@@ -1,0 +1,110 @@
+[
+  {
+    "title": "三角函数基础",
+    "description": "包含三角函数的定义、性质和基本公式",
+    "url": "https://www.geogebra.org/m/nUFXFbV8",
+    "file_type": "interactive",
+    "tags": ["三角函数", "数学", "基础"],
+    "keywords": ["正弦", "余弦", "正切", "三角恒等式", "弧度", "角度"],
+    "common_questions": ["三角函数怎么计算", "sin和cos的关系是什么", "三角函数的图像怎么画"]
+  },
+  {
+    "title": "微积分入门",
+    "description": "微积分的基本概念、导数和积分的计算方法",
+    "url": "https://www.khanacademy.org/math/calculus-1",
+    "file_type": "video",
+    "tags": ["微积分", "数学", "导数", "积分"],
+    "keywords": ["导数", "积分", "极限", "微分", "链式法则", "牛顿莱布尼茨公式"],
+    "common_questions": ["如何求导数", "定积分怎么计算", "微积分基本定理是什么"]
+  },
+  {
+    "title": "线性代数基础",
+    "description": "向量、矩阵、行列式和线性方程组的基本理论",
+    "url": "https://ocw.mit.edu/courses/mathematics/18-06-linear-algebra-spring-2010/",
+    "file_type": "course",
+    "tags": ["线性代数", "矩阵", "向量", "数学"],
+    "keywords": ["矩阵", "向量", "特征值", "特征向量", "行列式", "线性变换"],
+    "common_questions": ["如何求矩阵的逆", "特征值怎么计算", "如何解线性方程组"]
+  },
+  {
+    "title": "概率论与数理统计",
+    "description": "概率分布、随机变量、统计推断的基本方法",
+    "url": "https://seeing-theory.brown.edu/cn.html",
+    "file_type": "interactive",
+    "tags": ["概率论", "统计", "数学"],
+    "keywords": ["概率", "随机变量", "期望", "方差", "正态分布", "假设检验"],
+    "common_questions": ["如何计算概率", "什么是条件概率", "如何进行假设检验"]
+  },
+  {
+    "title": "几何学基础",
+    "description": "平面几何和空间几何的基本定理和性质",
+    "url": "https://www.mathsisfun.com/geometry/index.html",
+    "file_type": "html",
+    "tags": ["几何", "数学", "基础"],
+    "keywords": ["三角形", "圆", "多边形", "体积", "面积", "相似形"],
+    "common_questions": ["如何计算三角形面积", "圆的周长公式", "勾股定理怎么用"]
+  },
+  {
+    "title": "一元二次方程详解",
+    "description": "一元二次方程的求解方法、判别式和应用",
+    "url": "https://www.shuxuele.com/algebra/quadratic-equation.html",
+    "file_type": "html",
+    "tags": ["代数", "一元二次方程", "数学", "基础"],
+    "keywords": ["一元二次方程", "判别式", "求根公式", "配方法", "因式分解"],
+    "common_questions": ["一元二次方程怎么解", "判别式怎么用", "如何用配方法解一元二次方程"]
+  },
+  {
+    "title": "数列与级数",
+    "description": "数列通项公式、等差数列、等比数列和无穷级数",
+    "url": "https://www.bilibili.com/video/BV1Jt411V7GJ",
+    "file_type": "video",
+    "tags": ["数列", "级数", "数学"],
+    "keywords": ["数列", "等差数列", "等比数列", "收敛", "发散", "通项公式"],
+    "common_questions": ["等差数列求和公式", "等比数列前n项和", "如何判断级数收敛"]
+  },
+  {
+    "title": "函数与方程",
+    "description": "函数的性质、图像和方程的求解方法",
+    "url": "https://www.desmos.com/calculator?lang=zh-CN",
+    "file_type": "interactive",
+    "tags": ["函数", "方程", "数学", "基础"],
+    "keywords": ["函数", "方程", "不等式", "单调性", "奇偶性", "周期性"],
+    "common_questions": ["函数图像怎么画", "如何求函数的定义域", "函数的单调区间怎么确定"]
+  },
+  {
+    "title": "立体几何",
+    "description": "空间几何体的性质、表面积和体积计算",
+    "url": "https://www.geogebra.org/3d?lang=zh_CN",
+    "file_type": "interactive",
+    "tags": ["立体几何", "空间", "数学"],
+    "keywords": ["棱柱", "棱锥", "球体", "圆柱", "圆锥", "表面积", "体积"],
+    "common_questions": ["如何计算球的体积", "圆柱的表面积公式", "棱柱体积怎么算"]
+  },
+  {
+    "title": "排列组合与概率初步",
+    "description": "排列、组合的计算方法和基本概率计算",
+    "url": "https://www.mathsisfun.com/combinatorics/combinations-permutations.html",
+    "file_type": "html",
+    "tags": ["排列组合", "概率", "数学"],
+    "keywords": ["排列", "组合", "阶乘", "二项式系数", "概率"],
+    "common_questions": ["排列和组合的区别", "如何计算组合数", "概率怎么算"]
+  },
+  {
+    "title": "数学竞赛题解析",
+    "description": "各类数学竞赛题目的详细解答和思路分析",
+    "url": "https://artofproblemsolving.com/community",
+    "file_type": "forum",
+    "tags": ["数学竞赛", "奥数", "解题技巧"],
+    "keywords": ["数学竞赛", "奥林匹克", "解题思路", "证明题", "构造"],
+    "common_questions": ["如何准备数学竞赛", "奥数有什么技巧", "数学竞赛常见题型"]
+  },
+  {
+    "title": "高等数学重点难点",
+    "description": "高等数学中的重点难点内容和解题方法",
+    "url": "https://www.bilibili.com/video/BV1qW411N7FU",
+    "file_type": "video",
+    "tags": ["高等数学", "微积分", "数学"],
+    "keywords": ["多元函数", "偏导数", "重积分", "级数", "微分方程"],
+    "common_questions": ["多元函数怎么求导", "二重积分怎么计算", "傅里叶级数是什么"]
+  }
+]
