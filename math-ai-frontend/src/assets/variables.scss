@@ -1,0 +1,25 @@
+// 颜色变量
+$primary-color: #0069e0;
+$success-color: #67c23a;
+$warning-color: #e6a23c;
+$danger-color: #f56c6c;
+$text-primary: #303133;
+$text-secondary: #909399;
+$border-color: #dcdfe6;
+$background-color: #f8f9fa;
+$chat-background: #fafafa;
+
+// 阴影
+$shadow-light: 0 2px 12px 0 rgba(0, 0, 0, 0.06);
+
+// 混合宏
+@mixin flex-center($justify: center) {
+    display: flex;
+    align-items: center;
+    justify-content: $justify;
+}
+
+// 响应式断点
+$breakpoint-sm: 576px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 992px;

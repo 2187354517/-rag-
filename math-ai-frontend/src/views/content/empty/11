@@ -1,0 +1,482 @@
+<template>
+  <div class="knowledge-base-container">
+    <!-- 上传区域 -->
+    <el-card class="upload-section" shadow="never">
+      <template #header>
+        <div class="section-header">
+          <span class="header-title">上传知识文件</span>
+          <el-tag type="info" size="small">
+            支持格式: {{ allowedExtensions.join(', ') }} · 最大10MB
+          </el-tag>
+        </div>
+      </template>
+      
+      <el-upload
+        class="file-uploader"
+        drag
+        action=""
+        :http-request="handleUpload"
+        :before-upload="beforeUpload"
+        :show-file-list="false"
+      >
+        <div class="upload-area">
+          <el-icon class="upload-icon"><upload-filled /></el-icon>
+          <div class="upload-text">
+            <p class="main-text">拖拽文件到此处或点击上传</p>
+            <p class="sub-text">支持单个文件上传</p>
+          </div>
+        </div>
+        <template #tip>
+          <div class="upload-tip">
+            上传后文件将自动同步到知识库
+          </div>
+        </template>
+      </el-upload>
+    </el-card>
+
+    <!-- 文件列表 -->
+    <el-card class="file-list-section" shadow="never">
+      <template #header>
+        <div class="section-header">
+          <span class="header-title">知识库文件</span>
+          <el-button 
+            type="text" 
+            :icon="Refresh" 
+            @click="fetchDocuments"
+            :loading="loading"
+          >
+            刷新列表
+          </el-button>
+        </div>
+      </template>
+
+      <el-table
+        :data="filteredDocuments"
+        v-loading="loading"
+        style="width: 100%"
+        stripe
+        empty-text="暂无知识文件，请先上传"
+        :default-sort="{ prop: 'name', order: 'ascending' }"
+      >
+        <el-table-column prop="name" label="文件名" sortable min-width="300">
+          <template #default="scope">
+            <div class="file-item">
+              <el-icon class="file-icon">
+                <component :is="getFileIcon(scope.row.name)" />
+              </el-icon>
+              <el-tooltip 
+                :content="scope.row.name" 
+                placement="top" 
+                :disabled="scope.row.name.length < 30"
+              >
+                <el-link 
+                  type="primary" 
+                  :underline="false" 
+                  @click="showContent(scope.row.name)"
+                  class="file-name"
+                >
+                  {{ truncateFileName(scope.row.name) }}
+                </el-link>
+              </el-tooltip>
+            </div>
+          </template>
+        </el-table-column>
+        
+        <el-table-column 
+          prop="size" 
+          label="大小" 
+          width="120" 
+          sortable
+          :formatter="formatFileSize"
+        />
+        
+        <el-table-column label="操作" width="180" align="right">
+          <template #default="scope">
+            <el-button-group>
+              <el-tooltip content="查看内容" placement="top">
+                <el-button 
+                  size="small" 
+                  @click="showContent(scope.row.name)"
+                  :icon="View"
+                  circle
+                />
+              </el-tooltip>
+              
+              <el-tooltip content="编辑文件" placement="top">
+                <el-button 
+                  size="small" 
+                  @click="editDocument(scope.row.name)"
+                  :icon="Edit"
+                  circle
+                />
+              </el-tooltip>
+              
+              <el-tooltip content="删除文件" placement="top">
+                <el-button 
+                  size="small" 
+                  @click="deleteDocument(scope.row.name)"
+                  :icon="Delete"
+                  circle
+                  type="danger"
+                />
+              </el-tooltip>
+            </el-button-group>
+          </template>
+        </el-table-column>
+      </el-table>
+    </el-card>
+
+    <!-- 文件内容对话框 -->
+    <el-dialog 
+      v-model="contentVisible" 
+      :title="`文件内容 - ${currentFileName}`" 
+      width="70%"
+      top="5vh"
+      destroy-on-close
+    >
+      <div class="file-content-wrapper">
+        <el-scrollbar height="65vh">
+          <pre v-if="fileContent" class="file-content">{{ fileContent }}</pre>
+          <el-empty v-else description="空文件内容" />
+        </el-scrollbar>
+      </div>
+      
+      <template #footer>
+        <el-button @click="contentVisible = false">关闭</el-button>
+        <el-button 
+          type="primary" 
+          @click="editDocument(currentFileName)"
+          v-if="fileContent"
+        >
+          编辑内容
+        </el-button>
+      </template>
+    </el-dialog>
+  </div>
+</template>
+
+<script setup>
+import { ref, computed, onMounted } from 'vue'
+import { 
+  UploadFilled,
+  Document,
+  Edit,
+  Delete,
+  View,
+  Refresh,
+  Picture,
+  Notebook,
+  Tickets,
+  Files
+} from '@element-plus/icons-vue'
+import { ElMessage, ElMessageBox } from 'element-plus'
+import { apiRequest, fileUploadRequest } from '@/utils/request.js'
+
+// 响应式数据
+const documents = ref([])
+const fileContent = ref('')
+const contentVisible = ref(false)
+const currentFileName = ref('')
+const loading = ref(false)
+const allowedExtensions = ['pdf', 'txt', 'json', 'jsonl']
+const maxSize = 10 * 1024 * 1024 // 10MB
+
+// 计算属性
+const filteredDocuments = computed(() => {
+  return documents.value
+    .filter(doc => allowedExtensions.includes(doc.name.split('.').pop().toLowerCase()))
+    .sort((a, b) => a.name.localeCompare(b.name))
+})
+
+// 方法
+const fetchDocuments = async () => {
+  loading.value = true
+  try {
+    const response = await apiRequest('/knowledge-base/list')
+    documents.value = response.documents.map(doc => ({ 
+      name: doc.name,
+      size: doc.size || 0
+    }))
+  } catch (error) {
+    ElMessage.error('获取文档列表失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const beforeUpload = (file) => {
+  const fileExtension = file.name.split('.').pop().toLowerCase()
+  if (!allowedExtensions.includes(fileExtension)) {
+    ElMessage.error(`不支持的文件类型: ${fileExtension}`)
+    return false
+  }
+
+  if (file.size > maxSize) {
+    ElMessage.error(`文件大小超过限制: ${(maxSize / 1024 / 1024).toFixed(0)}MB`)
+    return false
+  }
+
+  return true
+}
+
+const handleUpload = (file) => {
+  fileUploadRequest(
+    '/knowledge-base/upload',
+    file.file,
+    (message, isDone) => {
+      if (isDone) {
+        if (message.includes('成功')) {
+          ElMessage.success(message)
+          fetchDocuments()
+        } else {
+          ElMessage.error(message)
+        }
+      }
+    },
+    () => {}
+  )
+}
+
+const showContent = async (filename) => {
+  try {
+    loading.value = true
+    currentFileName.value = filename
+    const response = await apiRequest(`/knowledge-base/get/${filename}`)
+    fileContent.value = response.content
+    contentVisible.value = true
+  } catch (error) {
+    ElMessage.error('获取文件内容失败')
+  } finally {
+    loading.value = false
+  }
+}
+
+const editDocument = async (filename) => {
+  try {
+    // 先获取当前文件内容
+    const contentRes = await apiRequest(`/knowledge-base/get/${filename}`)
+    
+    ElMessageBox.prompt('编辑文件内容', `编辑 ${filename}`, {
+      inputType: 'textarea',
+      inputValue: contentRes.content,
+      inputPlaceholder: '请输入文件内容',
+      customClass: 'edit-dialog',
+      inputValidator: (value) => {
+        if (!value || value.trim() === '') {
+          return '内容不能为空'
+        }
+        return true
+      }
+    }).then(async ({ value }) => {
+      try {
+        await apiRequest({
+          url: `/knowledge-base/update?filename=${encodeURIComponent(filename)}`,
+          method: 'PATCH',
+          data: { content: value }
+        })
+        ElMessage.success('文件更新成功')
+        fetchDocuments()
+      } catch (error) {
+        ElMessage.error('文件更新失败')
+      }
+    })
+  } catch (error) {
+    ElMessage.error('获取文件内容失败')
+  }
+}
+
+const deleteDocument = (filename) => {
+  ElMessageBox.confirm(
+    `确定要删除文件 "${filename}" 吗？此操作不可恢复。`,
+    '删除确认',
+    {
+      confirmButtonText: '确定删除',
+      cancelButtonText: '取消',
+      type: 'warning',
+      customClass: 'delete-confirm'
+    }
+  ).then(async () => {
+    try {
+      await apiRequest({
+        url: `/knowledge-base/delete?filename=${encodeURIComponent(filename)}`,
+        method: 'DELETE'
+      })
+      ElMessage.success('文件删除成功')
+      fetchDocuments()
+    } catch (error) {
+      ElMessage.error('文件删除失败: ' + error.message)
+    }
+  })
+}
+
+// 辅助方法
+const getFileIcon = (filename) => {
+  const ext = filename.split('.').pop().toLowerCase()
+  switch (ext) {
+    case 'pdf': return Picture
+    case 'txt': return Notebook
+    case 'json': return Tickets
+    case 'jsonl': return Files
+    default: return Document
+  }
+}
+
+const truncateFileName = (name) => {
+  return name.length > 30 ? name.substring(0, 27) + '...' : name
+}
+
+const formatFileSize = (row) => {
+  if (!row.size) return '-'
+  const size = row.size
+  if (size < 1024) return `${size} B`
+  if (size < 1024 * 1024) return `${(size / 1024).toFixed(1)} KB`
+  return `${(size / 1024 / 1024).toFixed(1)} MB`
+}
+
+// 生命周期
+onMounted(() => {
+  fetchDocuments()
+})
+</script>
+
+<style scoped>
+.knowledge-base-container {
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 20px;
+}
+
+.section-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.header-title {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--el-text-color-primary);
+}
+
+.upload-section {
+  margin-bottom: 24px;
+  border-radius: 8px;
+  border: 1px dashed var(--el-border-color-light);
+}
+
+.file-uploader {
+  :deep(.el-upload-dragger) {
+    padding: 40px;
+    border-radius: 8px;
+    background-color: var(--el-fill-color-lighter);
+    border: 1px dashed var(--el-border-color);
+    transition: all 0.3s;
+    
+    &:hover {
+      border-color: var(--el-color-primary);
+      background-color: var(--el-color-primary-light-9);
+    }
+  }
+}
+
+.upload-area {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px 0;
+}
+
+.upload-icon {
+  font-size: 48px;
+  color: var(--el-color-primary);
+  margin-bottom: 16px;
+}
+
+.upload-text {
+  text-align: center;
+  
+  .main-text {
+    font-size: 16px;
+    color: var(--el-text-color-primary);
+    margin-bottom: 4px;
+    font-weight: 500;
+  }
+  
+  .sub-text {
+    font-size: 12px;
+    color: var(--el-text-color-secondary);
+  }
+}
+
+.upload-tip {
+  margin-top: 12px;
+  font-size: 12px;
+  color: var(--el-text-color-secondary);
+  text-align: center;
+}
+
+.file-list-section {
+  border-radius: 8px;
+}
+
+.file-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.file-icon {
+  font-size: 18px;
+  color: var(--el-color-primary);
+}
+
+.file-name {
+  font-size: 14px;
+}
+
+.file-content-wrapper {
+  background-color: var(--el-fill-color-lighter);
+  border-radius: 6px;
+  padding: 16px;
+}
+
+.file-content {
+  margin: 0;
+  font-family: 'Menlo', 'Consolas', monospace;
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--el-text-color-primary);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+
+:deep(.el-table .cell) {
+  padding-left: 12px;
+  padding-right: 12px;
+}
+</style>
+
+<style>
+.edit-dialog {
+  width: 80%;
+  max-width: 800px;
+  
+  .el-message-box__content {
+    padding: 20px;
+  }
+  
+  .el-textarea__inner {
+    min-height: 300px;
+    font-family: 'Menlo', 'Consolas', monospace;
+    font-size: 13px;
+    line-height: 1.5;
+  }
+}
+
+.delete-confirm {
+  .el-message-box__message {
+    word-break: break-all;
+  }
+}
+</style>
