@@ -1,5 +1,5 @@
 # -rag-
-项目概述：
+项目概述（已添加多模态模型，可以进行识别图片）：
 
 ![image](https://github.com/user-attachments/assets/141348f1-7263-419e-9586-2b33e0af6778)
 
